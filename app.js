@@ -5,7 +5,7 @@ const mainState = {
     this.background = game.add.sprite(0, 0, 'background');
 
     this.man = game.add.sprite(400, 105, 'man');
-    this.pistol = game.add.sprite(this.man.position.x, this.man.position.y, 'pistol');
+    //this.pistol = game.add.sprite(this.man.position.x, this.man.position.y, 'pistol');
     game.physics.enable(this.man, Phaser.Physics.ARCADE);
 
     this.isPaused = false;
@@ -14,30 +14,50 @@ const mainState = {
     this.guns = {
       Pistol : {
         reloadTime : 0.7,
-        roundsPerMinute : 20,
+        roundsPerMinute : 175,
         magazineSize : 12,
-        cost : 0
-
+        cost : 0,
+        sprite : null,
+        spriteName : "pistol",
+        sound : null,
+        soundName : "pistol_s"
       },
-      SMG : {
+      Smg : {
         reloadTime : 1.6,
-        roundsPerMinute : 100,
+        roundsPerMinute : 600,
         magazineSize : 25,
-        cost : 250
+        cost : 250,
+        sprite : null,
+        spriteName : "smg",
+        sound : null,
+        soundName : "smg_s"
       },
       Shotgun : {
         reloadTime : 2,
         roundsPerMinute : 30,
         magazineSize : 8,
-        cost : 500
+        cost : 500,
+        sprite : null,
+        spriteName : "shotgun",
+        sound : null,
+        soundName : "shotgun_s"
       },
       Sniper : {
         reloadTime : 1,
         roundsPerMinute : 45,
         magazineSize : 15,
-        cost : 750
+        cost : 750,
+        sprite : null,
+        spriteName : "sniper",
+        sound : null,
+        soundName : "sniper_s"
       }
     };
+    this.currentGun = this.guns.Pistol;
+    this.timeBetweenShots = 1/(this.currentGun / 60000); // minute into milliseconds (60 seconds and 60,000 milliseconds)
+    this.gunSound
+
+    this.changeGun(this.currentGun);
 
     console.log(this.guns.Pistol);
 
@@ -58,7 +78,7 @@ const mainState = {
     this.bullets.enableBody = true;
     this.bullets.physicsBodyType = Phaser.Physics.ARCADE;
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 40; i++) {
       let b = this.bullets.create(0, 0, 'bullet');
       b.exists = false;
       b.visible = false;
@@ -83,9 +103,8 @@ const mainState = {
     }
 
     this.score = 0;
-    this.scoreDisplay = game.add.text(200, 20, `Money:${this.score} \nHighScore: ${this.highScore}`, { font: '30px Arial', fill: '#ffffff' });
+    this.scoreDisplay = game.add.text(200, 20, `Money £${this.score} \nHighScore: ${this.highScore}`, { font: '30px Arial', fill: '#ffffff' });
 
-    this.fireSound = game.add.audio('pistol_s');
 
     this.cursors = game.input.keyboard.createCursorKeys();
     game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
@@ -98,10 +117,14 @@ const mainState = {
 
     game.add.sprite(0, 0, "sm hole");
 
+    this.shopSprite = game.add.sprite(0, 0, "shop");
+    this.shopSmg = game.add.sprite(475, 20, "shopSmg");
+    this.shopShotgun = game.add.sprite(675, 20, "shopShotgun");
+    this.shopSniper = game.add.sprite(875, 20, "shopSniper");
+    this.adjustShopVisibility(false);
   },
 
   waveSpawn: function ()  {
-
     let spawn = function(){
       this.zombieMoveSpeed += this.zombieMoveSpeedIncrease;
       for (let i = 0; i < 28; i++) {
@@ -120,18 +143,17 @@ const mainState = {
       }
     };
 
-    game.time.events.add(Phaser.Timer.SECOND *5, spawn, this);
+    game.time.events.add(Phaser.Timer.SECOND *8, spawn, this);
   },
-
 
   fire: function () {
     if (game.time.now > this.bulletTime) {
       this.fireSound.play();
       let bullet = this.bullets.getFirstExists(false);
       if (bullet) {
-        bullet.reset(this.pistol.x + (this.pistol.width - 50), this.pistol.y - (this.pistol.height -110));
+        bullet.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130));
         bullet.body.velocity.y = 1500;
-        this.bulletTime = game.time.now + 150;
+        this.bulletTime = game.time.now + this.timeBetweenShots;
       }
     }
   },
@@ -151,25 +173,24 @@ const mainState = {
     if (this.zombies.countLiving() === 0) {
       this.score = this.score + 100;
       this.waveSpawn();
-
-
       // this.gameOver();
     }
-    this.scoreDisplay.text = `Score: ${this.score} \nHighScore: ${this.highScore}`;
+
+    this.scoreDisplay.text = `Money £${this.score} \nHighScore: ${this.highScore}`;
   },
 
   preload: function () {
-
     game.load.spritesheet('zss', 'assets/ZSS.png', 64, 64, 2);
 
-    //misc=====================================================
+    //misc-----------------------------------------------------
     game.load.image('bullet', 'assets/bullet.png');
     game.load.spritesheet('explode', 'assets/explode.png', 128, 128);
     game.load.image('background', 'assets/background.png');
     game.load.image('man', 'assets/Naked Man.png');
     game.load.image('sm', 'assets/salesman.png');
     game.load.image('sm hole', 'assets/hidey wall.png');
-    //misc=====================================================
+    game.load.image('shop', 'assets/shopscreen.png');
+    //misc-----------------------------------------------------
 
     //sounds----------------------------------------------------
     game.load.audio('pistol_s', 'assets/Soundz/Pistol.mp3');
@@ -189,14 +210,67 @@ const mainState = {
     game.load.image('pistol', 'assets/Gunz/Pistol.png');
     game.load.image('smg', 'assets/Gunz/SMG.png');
     game.load.image('shotgun', 'assets/Gunz/Shotgun.png');
-    game.load.image('Sniper', 'assets/Gunz/Sniper.png');
+    game.load.image('sniper', 'assets/Gunz/Sniper.png');
     //guns-------------------------------------------------------
+
+    //shop sprites----------------------------------------------
+    game.load.image('shopSmg', 'assets/ShopSprites/smg.png');
+    game.load.image('shopShotgun', 'assets/ShopSprites/shotgun.png');
+    game.load.image('shopSniper', 'assets/ShopSprites/sniper.png');
+    //shop sprites----------------------------------------------
   },
 
   GotHit: function (zombie, man) {
     this.explosion.reset(this.man.x + (this.man.width / 2), this.man.y + (this.man.height / 2));
     this.man.kill();
     this.explosion.animations.play('boom');
+  },
+
+  shop: function () {
+    let distance = Math.abs(this.man.x - this.sm.x);
+
+    if (distance < 62 && this.isWaveCleared === true) {
+      console.log("your shoppin, good jobbin");
+      this.adjustShopVisibility(true);
+
+    }
+    else {
+      this.adjustShopVisibility(false);
+    }
+  },
+
+  adjustShopVisibility: function(visibility){
+    this.shopSprite.visible = visibility;
+    this.shopSmg.visible = visibility
+    this.shopShotgun.visible = visibility;
+    this.shopSniper.visible = visibility;
+
+    this.shopSmg.inputEnabled = true;
+    this.shopSmg.events.onInputDown.add(()=>{ this.changeGun(this.guns.Smg);
+
+     });
+
+
+    //get gun
+    // - Money
+    // profit
+    this.shopShotgun.inputEnabled = true;
+    this.shopShotgun.events.onInputDown.add(()=>{ this.changeGun(this.guns.Shotgun); });
+
+    this.shopSniper.inputEnabled = true;
+    this.shopSniper.events.onInputDown.add(()=>{ this.  changeGun(this.guns.Sniper); });
+
+  },
+
+  changeGun: function (gun) {
+    if(this.currentGun.sprite != null)
+      this.currentGun.sprite.kill();
+    this.currentGun = gun;
+    gun.sprite = game.add.sprite(this.man.position.x, this.man.position.y, gun.spriteName);
+    this.timeBetweenShots = 1/(gun.roundsPerMinute / 60000);
+    this.fireSound = game.add.audio(gun.soundName);
+    gun.sound = this.fireSound;
+
   },
 
   update: function () {
@@ -252,14 +326,18 @@ const mainState = {
       this.fire();
     }
 
-    this.pistol.position = this.man.position;
+    this.currentGun.sprite.position = this.man.position;
 
     if (this.isWaveCleared ===  false) {
        game.add.tween(this.sm.body).to( {y:175}, 500, Phaser.Easing.Linear.None, true );
+
      }
      else {
        game.add.tween(this.sm.body).to( {y:122}, 500, Phaser.Easing.Linear.None, true );
     }
+    //this.adjustShopVisibility(this.isWaveCleared);
+
+    this.shop();
   },
 
 
