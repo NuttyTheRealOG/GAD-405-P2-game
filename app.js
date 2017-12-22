@@ -9,8 +9,39 @@ const mainState = {
     game.physics.enable(this.man, Phaser.Physics.ARCADE);
 
     this.isPaused = false;
+    this.isWaveCleared = false;
 
-//zombie---------------------------------------------
+    this.guns = {
+      Pistol : {
+        reloadTime : 0.7,
+        roundsPerMinute : 20,
+        magazineSize : 12,
+        cost : 0
+
+      },
+      SMG : {
+        reloadTime : 1.6,
+        roundsPerMinute : 100,
+        magazineSize : 25,
+        cost : 250
+      },
+      Shotgun : {
+        reloadTime : 2,
+        roundsPerMinute : 30,
+        magazineSize : 8,
+        cost : 500
+      },
+      Sniper : {
+        reloadTime : 1,
+        roundsPerMinute : 45,
+        magazineSize : 15,
+        cost : 750
+      }
+    };
+
+    console.log(this.guns.Pistol);
+
+    //zombie---------------------------------------------
 
     this.zombies = game.add.group();
     this.zombies.enableBody = true;
@@ -19,8 +50,9 @@ const mainState = {
     this.waveSpawn();
 
     this.zombieMoveSpeed = 0.1;
+    this.zombieMoveSpeedIncrease = 0.075;
 
-//zombie---------------------------------------------
+    //zombie---------------------------------------------
 
     this.bullets = game.add.group();
     this.bullets.enableBody = true;
@@ -44,9 +76,6 @@ const mainState = {
     this.explosion.anchor.y = 0.5;
     this.explosion.animations.add('boom');
 
-
-
-
     this.highScore = localStorage.getItem('invadershighscore');
     if (this.highScore === null) {
       localStorage.setItem('invadershighscore', 0);
@@ -54,32 +83,45 @@ const mainState = {
     }
 
     this.score = 0;
-    this.scoreDisplay = game.add.text(200, 20, `Score: ${this.score} \nHighScore: ${this.highScore}`, { font: '30px Arial', fill: '#ffffff' });
+    this.scoreDisplay = game.add.text(200, 20, `Money:${this.score} \nHighScore: ${this.highScore}`, { font: '30px Arial', fill: '#ffffff' });
 
-    this.fireSound = game.add.audio('pistol');
+    this.fireSound = game.add.audio('pistol_s');
 
     this.cursors = game.input.keyboard.createCursorKeys();
     game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
+
+    this.sm = game.add.sprite(1125, 122 , 'sm');
+
+    game.physics.enable(this.sm, Phaser.Physics.ARCADE);
+    game.time.events.add(Phaser.Timer.SECOND *5, ()=>{}, this);
+    game.add.tween(this.sm.body).to( {y:175}, 1500, Phaser.Easing.Linear.None, true );
+
+    game.add.sprite(0, 0, "sm hole");
+
   },
 
   waveSpawn: function ()  {
-    this.zombieMoveSpeed += 0.075;
-    for (let i = 0; i < 28; i++) {
-      let c = this.zombies.create(105 + (i % 4) * 90, 350 + Math.floor(i / 8) * 80, 'zss');
-      c.body.immovable = true;
 
-      c.animations.add('crawl', [0,1], 3, true);
-      c.animations.play("crawl");
-    }
-    for (let i = 0; i < 30; i++) {
-      let c = this.zombies.create(580 + (i % 6) * 90, 350 + Math.floor(i / 8) * 80, 'zss');
-      c.body.immovable = true;
+    let spawn = function(){
+      this.zombieMoveSpeed += this.zombieMoveSpeedIncrease;
+      for (let i = 0; i < 28; i++) {
+        let c = this.zombies.create(105 + (i % 4) * 90, 350 + Math.floor(i / 8) * 80, 'zss');
+        c.body.immovable = true;
 
-      c.animations.add('crawl', [0,1], 3, true);
-      c.animations.play("crawl");
-    }
+        c.animations.add('crawl', [0,1], 3, true);
+        c.animations.play("crawl");
+      }
+      for (let i = 0; i < 30; i++) {
+        let c = this.zombies.create(580 + (i % 6) * 90, 350 + Math.floor(i / 8) * 80, 'zss');
+        c.body.immovable = true;
+
+        c.animations.add('crawl', [0,1], 3, true);
+        c.animations.play("crawl");
+      }
+    };
+
+    game.time.events.add(Phaser.Timer.SECOND *5, spawn, this);
   },
-
 
 
   fire: function () {
@@ -117,18 +159,38 @@ const mainState = {
   },
 
   preload: function () {
-    game.load.image('ship', 'assets/ship.png');
+
     game.load.spritesheet('zss', 'assets/ZSS.png', 64, 64, 2);
+
+    //misc=====================================================
     game.load.image('bullet', 'assets/bullet.png');
     game.load.spritesheet('explode', 'assets/explode.png', 128, 128);
-    game.load.audio('fire', 'assets/fire.mp3');
-
-    game.load.audio('pistol', 'assets/Soundz/Pistol.mp3');
-
     game.load.image('background', 'assets/background.png');
-
     game.load.image('man', 'assets/Naked Man.png');
+    game.load.image('sm', 'assets/salesman.png');
+    game.load.image('sm hole', 'assets/hidey wall.png');
+    //misc=====================================================
+
+    //sounds----------------------------------------------------
+    game.load.audio('pistol_s', 'assets/Soundz/Pistol.mp3');
+    game.load.audio('smg_s', 'assets/Soundz/smg.mp3');
+    game.load.audio('shotgun_s', 'assets/Soundz/shotty.mp3');
+    game.load.audio('sniper_s', 'assets/Soundz/snooiper.mp3');
+    //sounds-----------------------------------------------------
+
+    //armour-----------------------------------------------------
+    game.load.image('top1', 'assets/armour/top 1.png');
+    game.load.image('top2', 'assets/armour/top 2.png');
+    game.load.image('bottom 1', 'assets/armour/bottom 1.png');
+    game.load.image('bottom 2', 'assets/armour/bottom 2.png');
+    //armour-----------------------------------------------------
+
+    //guns-------------------------------------------------------
     game.load.image('pistol', 'assets/Gunz/Pistol.png');
+    game.load.image('smg', 'assets/Gunz/SMG.png');
+    game.load.image('shotgun', 'assets/Gunz/Shotgun.png');
+    game.load.image('Sniper', 'assets/Gunz/Sniper.png');
+    //guns-------------------------------------------------------
   },
 
   GotHit: function (zombie, man) {
@@ -138,6 +200,8 @@ const mainState = {
   },
 
   update: function () {
+    this.isWaveCleared = (this.zombies.countLiving() == 0);
+
     game.physics.arcade.overlap(this.bullets, this.zombies, this.hit, null, this);
     game.physics.arcade.overlap(this.zombies, this.man, this.manGotHit, null, this);
 
@@ -179,7 +243,7 @@ const mainState = {
       }
     } else if (this.cursors.right.isDown) {
       // Hardcoded the width of the game, get this somehow
-      if (this.man.position.x < 1280 - distFromSides - 75) {
+      if (this.man.position.x < 1280 - distFromSides - 170) {
         this.man.body.velocity.x = 300;
       }
     }
@@ -188,29 +252,15 @@ const mainState = {
       this.fire();
     }
 
-
     this.pistol.position = this.man.position;
+
+    if (this.isWaveCleared ===  false) {
+       game.add.tween(this.sm.body).to( {y:175}, 500, Phaser.Easing.Linear.None, true );
+     }
+     else {
+       game.add.tween(this.sm.body).to( {y:122}, 500, Phaser.Easing.Linear.None, true );
+    }
   },
-
-// guns
-
-  pistol: function () {
-
-  },
-
-  smg: function() {
-
-  },
-
-  shotgun: function() {
-
-  },
-
-  sniper: function() {
-
-  }
-
-// guns
 
 
 };
@@ -225,11 +275,11 @@ const gameoverState = {
       game.world.centerX - gameOverImg.width / 2,
       game.world.centerY - gameOverImg.height / 2,
       'gg');
-    game.input.onDown.add(() => { game.state.start('main'); });
-  }
-};
+      game.input.onDown.add(() => { game.state.start('main'); });
+    }
+  };
 
-const game = new Phaser.Game(1280, 720);
-game.state.add('main', mainState);
-game.state.add('gameover', gameoverState);
-game.state.start('main');
+  const game = new Phaser.Game(1280, 720);
+  game.state.add('main', mainState);
+  game.state.add('gameover', gameoverState);
+  game.state.start('main');
