@@ -13,6 +13,7 @@ const mainState = { // create main scean
     this.clothesBought = 0;
     this.health = 1;
 
+
     this.guns = { // class for weapons
         Pistol : { // weapon name
         reloadTime : 0.7, // reload time of gun
@@ -28,7 +29,7 @@ const mainState = { // create main scean
         reloadTime : 1.6, // reload time of gun
         roundsPerMinute : 600, // rounds per min of gun
         magazineSize : 25, // ammount of bullets untill reload of gun
-        cost : 250, // gun cost
+        cost : 0, // gun cost
         sprite : null,// doesnt load in at start
         spriteName : "smg", // sprite it will use
         sound : null, // sound doesnt load in at start
@@ -38,7 +39,7 @@ const mainState = { // create main scean
         reloadTime : 2, // reload time of gun
         roundsPerMinute : 50, // rounds per min of gun
         magazineSize : 8, // ammount of bullets untill reload of gun
-        cost : 500, // gun cost
+        cost : 0, // gun cost
         sprite : null,// doesnt load in at start
         spriteName : "shotgun", // sprite it will use
         sound : null, // sound doesnt load in at start
@@ -46,9 +47,9 @@ const mainState = { // create main scean
       },
       Sniper : { // weapon name of gun
         reloadTime : 1, // reload time of gun
-        roundsPerMinute : 45, // rounds per min of gun
+        roundsPerMinute : 60, // rounds per min of gun
         magazineSize : 15, // ammount of bullets untill reload of gun
-        cost : 750, // gun cost
+        cost : 0, // gun cost
         sprite : null,// doesnt load in at start
         spriteName : "sniper", // sprite it will use
         sound : null, // sound doesnt load in at start
@@ -57,7 +58,7 @@ const mainState = { // create main scean
     };
     this.currentGun = this.guns.Pistol; // sets the starting gun to the pistol
     this.timeBetweenShots = 1/(this.currentGun / 60000); // minute into milliseconds (60 seconds and 60,000 milliseconds)
-    this.gunSound // give weapon its sound
+
 
     this.changeGun(this.currentGun); // changes the gun on event
 
@@ -133,14 +134,11 @@ this.boughtArmour = [];
 */
 
 // score stuff i bearly understand-------------------------------------------
-    this.highScore = localStorage.getItem('invadershighscore');
-    if (this.highScore === null) {
-      localStorage.setItem('invadershighscore', 0);
-      this.highScore = 0;
-    }
+
+
 
     this.score = 0;
-    this.scoreDisplay = game.add.text(200, 20, `Money £${this.score} \nHighScore: ${this.highScore}`, { font: '30px Arial', fill: '#ffffff' });
+    this.scoreDisplay = game.add.text(1100, 20, `Money £${this.score}`, { font: '30px Arial', fill: '#584f99' });
 // score stuff i bearly understand-------------------------------------------
 
     this.cursors = game.input.keyboard.createCursorKeys(); // setting spacebar as a button
@@ -174,29 +172,39 @@ this.boughtArmour = [];
 // the shop---------------------------------------------------------------
 
 this.armourt1 = game.add.group();
-this.armourt2 = game.add.group();
 this.armourb1 = game.add.group();
+this.armourt2 = game.add.group();
 this.armourb2 = game.add.group();
 
   this.fullHealth = game.add.group()
-  for (let i = 0; i < this.health; i++) { // create 28 zombies
-  let j = this.fullHealth.create(0 + (i % 5) * 90, 0, 'heart'); }
+
   //game.add.sprite(10, 10, "heart")
+
+  this.updateHealth();
 
   },
 
   waveSpawn: function ()  { // create function wavespawn
     let spawn = function(){ // create spawn function
       this.zombieMoveSpeed += this.zombieMoveSpeedIncrease; // increase enemys speed
-      for (let i = 0; i < 28; i++) { // create 28 zombies
-        let c = this.zombies.create(105 + (i % 4) * 90, 350 + Math.floor(i / 8) * 80, 'zss'); // set there starting postion
+      for (let i = 0; i < 16; i++) { // create 28 zombies
+        let c = this.zombies.create(105 + (i % 4) * 90, 350 + Math.floor(i / 4) * 80, 'zss'); // set there starting postion
         c.body.immovable = true;
 
         c.animations.add('crawl', [0,1], 3, true); // add frames of sprite sheet
         c.animations.play("crawl"); // play animation
       }
-      for (let i = 0; i < 30; i++) { // create 30 zombies
-        let c = this.zombies.create(580 + (i % 6) * 90, 350 + Math.floor(i / 8) * 80, 'zss');  // set there starting postion
+
+      for (let i = 0; i < 16; i++) { // create 30 zombies
+        let c = this.zombies.create(580 + (i % 4) * 90, 350 + Math.floor(i / 4) * 80, 'zss');  // set there starting postion
+        c.body.immovable = true;
+
+        c.animations.add('crawl', [0,1], 3, true); // add frames of sprite sheet
+        c.animations.play("crawl"); // play animation
+      }
+
+      for (let i = 0; i < 8; i++) { // create 30 zombies
+        let c = this.zombies.create(950 + (i % 2) * 90, 350 + Math.floor(i / 2) * 80, 'zss');  // set there starting postion
         c.body.immovable = true;
 
         c.animations.add('crawl', [0,1], 3, true); // add frames of sprite sheet
@@ -207,11 +215,56 @@ this.armourb2 = game.add.group();
     game.time.events.add(Phaser.Timer.SECOND *8, spawn, this); // 8 seconds spawn time gap bettween waves
   },
 
+  updateHealth: function() {
+    this.fullHealth.forEach((hp)=>{
+      hp.destroy();
+    });
+
+    for (let i = 0; i < this.health; i++) {
+      let j = this.fullHealth.create(i * 70, 0, 'heart');
+    }
+  },
+
   fire: function () { // the shooting function
     if (game.time.now > this.bulletTime) { //
       this.fireSound.play(); // play the gun sound
       let bullet = this.bullets.getFirstExists(false);
-      if (bullet) { // if this is true
+      if (bullet && this.currentGun == this.guns.Shotgun) { // if this is true
+        bullet.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
+        bullet.body.velocity.y = 1500;  bullet.body.velocity.x = 500; // makes bullets move at speed
+      }
+      let bullet2 = this.bullets.getFirstExists(false);
+      if (bullet2 && this.currentGun == this.guns.Shotgun) {
+        bullet2.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
+        bullet2.body.velocity.y = 1500;  bullet2.body.velocity.x = -500; // makes bullets move at speed
+        this.bulletTime = game.time.now + this.timeBetweenShots; //
+      }
+      let bullet3 = this.bullets.getFirstExists(false);
+      if (bullet3 && this.currentGun == this.guns.Shotgun) {
+        bullet3.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
+        bullet3.body.velocity.y = 1500; // makes bullets move at speed
+        this.bulletTime = game.time.now + this.timeBetweenShots; //
+      }
+      let bullet4 = this.bullets.getFirstExists(false);
+      if (bullet4 && this.currentGun == this.guns.Shotgun) {
+        bullet4.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
+        bullet4.body.velocity.y = 1500; bullet4.body.velocity.x = 1250; // makes bullets move at speed
+        this.bulletTime = game.time.now + this.timeBetweenShots; //
+      }
+      let bullet5 = this.bullets.getFirstExists(false);
+      if (bullet5 && this.currentGun == this.guns.Shotgun) {
+        bullet5.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
+        bullet5.body.velocity.y = 1500; bullet5.body.velocity.x = -1250; // makes bullets move at speed
+        this.bulletTime = game.time.now + this.timeBetweenShots; //
+      }
+
+
+
+
+
+
+
+      else {
         bullet.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
         bullet.body.velocity.y = 1500; // makes bullets move at speed
         this.bulletTime = game.time.now + this.timeBetweenShots; //
@@ -220,15 +273,11 @@ this.armourb2 = game.add.group();
   },
 
   gameOver: function () { // create function called game over
-    if (this.score > this.highScore) { // if the score is bigger than the highScore
-      this.highScore = this.score; // set currant score to high score
-      localStorage.setItem('invadershighscore', this.highScore);
-    }
     game.state.start('gameover'); // change state to game over screen
   },
 
   hit: function (bullet, zss) { // create hit function that applys to bullet and zss
-    this.score = this.score + 10; // and 10 to score
+    this.score = this.score + Math.floor(Math.random() * 4) + 0   ; // and 10 to score
 
     if (this.currentGun == this.guns.Pistol || this.currentGun == this.guns.Smg || this.currentGun == this.guns.Shotgun) {
       bullet.kill();
@@ -236,12 +285,12 @@ this.armourb2 = game.add.group();
 
     zss.kill(); // kill the zss
     if (this.zombies.countLiving() === 0) {// when there are no zombies left
-      this.score = this.score + 100; // add 100 to score
+      this.score = this.score + 10; // add 100 to score
       this.waveSpawn(); // run wave spawn function
       // this.gameOver();
     }
 
-    this.scoreDisplay.text = `Money £${this.score} \nHighScore: ${this.highScore}`; // displays score and high score
+    this.scoreDisplay.text = `Money £${this.score}`; // displays score and high score
   },
 
   preload: function () { // load in assets before game starts
@@ -356,16 +405,21 @@ this.armourb2 = game.add.group();
         armour.sprite = game.add.sprite(this.man.position.x, this.man.position.y, armour.spriteName, this.health ++, console.log(this.health));
 
         if(armour === this.armourT1) {
-          this.health + 1
+
 
         }
 
       this.boughtArmour.push(armour);
     //  this.clothesBought = this.clothesBought + 1;
+    this.updateHealth();
 
   },
 
   changeGun: function (gun) { // function to change gun
+    if (this.score < gun.cost) {
+      console.log("lol2poor")
+      return;
+    }
     if(this.currentGun.sprite != null) // if gun is null
       this.currentGun.sprite.kill(); // kill currant gun
     this.currentGun = gun; // and becoms new gun
@@ -374,7 +428,9 @@ this.armourb2 = game.add.group();
     this.fireSound = game.add.audio(gun.soundName); // change gun soung to selected gun sound
     gun.sound = this.fireSound; // change gun soung to selected gun sound
 
+
   },
+
 
   update: function () { // function that updates each frame
     this.isWaveCleared = (this.zombies.countLiving() == 0); //
@@ -408,9 +464,18 @@ this.armourb2 = game.add.group();
     this.zombies.forEach( // every zombie
       (zombie) => {
         zombie.body.position.y = zombie.body.position.y - this.zombieMoveSpeed; // adds incremental speed
-        if (zombie.y + zombie.height < 200) { this.gameOver(); } //if zombie reaches top of building, game over
+        if (zombie.y + zombie.height < 200) {
+        zombie.destroy();
+          this.health --;
+          console.log(this.health);
+          this.updateHealth();
+        }
       }
     );
+
+    if (this.health <= 0) {
+      this.gameOver();
+    }
 
     // Distance in pixels the player can walk from the edge of the screen
     let distFromSides = 50;
