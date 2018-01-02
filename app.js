@@ -13,7 +13,7 @@ const mainState = { // create main scean
     this.isWaveCleared = false; // boolean for wave interval
     this.clothesBought = 0; // Sets ammount of clothes bought
     this.health = 1; // sets starting health
-    this.currentWave = 0;
+    this.currentWave = 4;
     this.canBuyMines = true;
 
     this.guns = { // class for weapons
@@ -21,7 +21,7 @@ const mainState = { // create main scean
         reloadTime : 0.7, // reload time of gun
         roundsPerMinute : 175, // rounds per min of gun
         magazineSize : 12, // ammount of bullets untill reload of gun
-        cost : 0, // points needed to get it
+        cost : 20, // points needed to get it
         sprite : null, // sprite doesnt load in at start
         spriteName : "pistol", // sprite it will use
         sound : null, // sound doesnt load in at start
@@ -32,7 +32,7 @@ const mainState = { // create main scean
         reloadTime : 1.6, // reload time of gun
         roundsPerMinute : 600, // rounds per min of gun
         magazineSize : 25, // ammount of bullets untill reload of gun
-        cost : 0, // points needed to get it
+        cost : 20, // points needed to get it
         sprite : null,// doesnt load in at start
         spriteName : "smg", // sprite it will use
         sound : null, // sound doesnt load in at start
@@ -43,7 +43,7 @@ const mainState = { // create main scean
         reloadTime : 2, // reload time of gun
         roundsPerMinute : 50, // rounds per min of gun
         magazineSize : 8, // ammount of bullets untill reload of gun
-        cost : 0, // points needed to get it
+        cost : 20, // points needed to get it
         sprite : null,// doesnt load in at start
         spriteName : "shotgun", // sprite it will use
         sound : null, // sound doesnt load in at start
@@ -54,7 +54,7 @@ const mainState = { // create main scean
         reloadTime : 1, // reload time of gun
         roundsPerMinute : 60, // rounds per min of gun
         magazineSize : 15, // ammount of bullets untill reload of gun
-        cost : 0, // points needed to get it
+        cost : 20, // points needed to get it
         sprite : null,// doesnt load in at start
         spriteName : "sniper", // sprite it will use
         sound : null, // sound doesnt load in at start
@@ -75,31 +75,31 @@ const mainState = { // create main scean
         sprite : null, // doesnt load at the start
         spriteName : "bottom1", // sprite it will use
         healthBouns: 1, // amount of health it will give you
-        cost : 0, // points needed to get it
+        cost : 20, // points needed to get it
       },
 
       Shirt : { // name of armour
         sprite : null,// doesnt load at the start
         spriteName : "top1",// sprite it will use
         healthBouns: 1,// amount of health it will give you
-        cost : 0,// points needed to get it
+        cost : 20,// points needed to get it
       },
 
       Shoes : {// name of armour
         sprite : null,// doesnt load at the start
         spriteName : "bottom2",// sprite it will use
         healthBouns: 1,// amount of health it will give you
-        cost : 0,// points needed to get it
+        cost : 20,// points needed to get it
       },
 
       Jacket : {// name of armour
         sprite : null,// doesnt load at the start
         spriteName : "top2",// sprite it will use
         healthBouns: 1,// amount of health it will give you
-        cost : 0// points needed to get it
+        cost : 20// points needed to get it
       }
     }
-    this.mineCost= 0;
+    this.mineCost= 20;
     this.boughtArmour = []; // creates empty array
 
     //zombie---------------------------------------------
@@ -131,15 +131,15 @@ const mainState = { // create main scean
       b.events.onOutOfBounds.add((bullet) => { bullet.kill(); }); // will kill bullet if it is out of canvas
     }
 
-    this.bulletTime = 0; //
+    this.bulletTime = 0;
 
-// score stuff i bearly understand-------------------------------------------
+
 
     this.score = 0;
     this.scoreDisplay = game.add.text(1100, 20, `Money £${this.score}`, { font: '30px Arial', fill: '#584f99' });
     this.waveDisplay = game.add.text(1100, 65, `Wave ${this.currentWave}/5`, { font: '30px Arial', fill: '#584f99' });
     this.mineDisplay = game.add.text(10, 60, `Mines: ${this.mineCount}`, { font: '15px Arial', fill: '#ffffff' });
-// score stuff i bearly understand-------------------------------------------
+
 
     this.cursors = game.input.keyboard.createCursorKeys(); // setting spacebar as a button
     game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]); // setting spacebar as a button
@@ -181,6 +181,8 @@ const mainState = { // create main scean
   },
 
   waveSpawn: function ()  { // create function wavespawn
+
+      game.time.events.add(Phaser.Timer.SECOND *1, ()=>{}, this);
     let spawn = function(){ // create spawn function
       this.zombieMoveSpeed += this.zombieMoveSpeedIncrease; // increase enemys speed
       for (let i = 0; i < 16; i++) { // create 28 zombies
@@ -287,6 +289,9 @@ const mainState = { // create main scean
   gameOver: function () { // create function called game over
     game.state.start('gameover'); // change state to game over screen
   },
+  winner: function() {
+  game.state.start('won')
+  },
 
   hit: function (bullet, zss) { // create hit function that applys to bullet and zss
     this.score = this.score + Math.floor(Math.random() * 4) + 0   ; // and 10 to score
@@ -301,7 +306,7 @@ const mainState = { // create main scean
     if (this.zombies.countLiving() === 0) {// when there are no zombies left
       this.score = this.score + 10; // add 100 to score
       this.waveSpawn(); // run wave spawn function
-      // this.gameOver();
+
     }
 
     this.scoreDisplay.text = `Money £${this.score}`; // displays score and high score
@@ -515,6 +520,10 @@ const mainState = { // create main scean
       this.gameOver(); // call gameOver
     }
 
+    if (this.currentWave === 6) { // if your health is 0 or lower
+      this.winner(); // call gameOver
+    }
+
     // Distance in pixels the player can walk from the edge of the screen
     let distFromSides = 50; // creats movement boundry
     if (this.cursors.left.isDown) { // if left button is down
@@ -601,7 +610,17 @@ const gameoverState = { // game over state
     }
   };
 
+  const wonState = { // game over state
+    preload: function () { // load in assets before game starts
+      game.load.image('win', 'assets/win.png'); // load image
+    },
+    create: function () {  // static code
+    game.add.image(0, 0, "win")
+  }
+  };
+
   const game = new Phaser.Game(1280, 720); // Phaser game in 720p
   game.state.add('main', mainState); // add mainState
   game.state.add('gameover', gameoverState);  // add gameover
+  game.state.add('won', wonState );
   game.state.start('main'); // start main
