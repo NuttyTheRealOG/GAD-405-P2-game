@@ -13,7 +13,8 @@ const mainState = { // create main scean
     this.isWaveCleared = false; // boolean for wave interval
     this.clothesBought = 0; // Sets ammount of clothes bought
     this.health = 1; // sets starting health
-
+    this.currentWave = 0;
+    this.canBuyMines = true;
 
     this.guns = { // class for weapons
         Pistol : { // weapon name
@@ -24,7 +25,8 @@ const mainState = { // create main scean
         sprite : null, // sprite doesnt load in at start
         spriteName : "pistol", // sprite it will use
         sound : null, // sound doesnt load in at start
-        soundName : "pistol_s"  // sound it will use
+        soundName : "pistol_s",  // sound it will use
+        isBought : false
       },
       Smg : { // weapon name of gun
         reloadTime : 1.6, // reload time of gun
@@ -34,7 +36,8 @@ const mainState = { // create main scean
         sprite : null,// doesnt load in at start
         spriteName : "smg", // sprite it will use
         sound : null, // sound doesnt load in at start
-        soundName : "smg_s" // sound it will use
+        soundName : "smg_s", // sound it will use
+        isBought : false
       },
       Shotgun : { // weapon name of gun
         reloadTime : 2, // reload time of gun
@@ -44,7 +47,8 @@ const mainState = { // create main scean
         sprite : null,// doesnt load in at start
         spriteName : "shotgun", // sprite it will use
         sound : null, // sound doesnt load in at start
-        soundName : "shotgun_s" // sound it will use
+        soundName : "shotgun_s", // sound it will use
+        isBought : false
       },
       Sniper : { // weapon name of gun
         reloadTime : 1, // reload time of gun
@@ -54,7 +58,8 @@ const mainState = { // create main scean
         sprite : null,// doesnt load in at start
         spriteName : "sniper", // sprite it will use
         sound : null, // sound doesnt load in at start
-        soundName : "sniper_s" // sound it will use
+        soundName : "sniper_s", // sound it will use
+        isBought : false
       }
     };
     this.currentGun = this.guns.Pistol; // sets the starting gun to the pistol
@@ -63,6 +68,7 @@ const mainState = { // create main scean
 
     this.changeGun(this.currentGun); // changes the gun on event
 
+    this.mineCount = 0;
 
     this.armour = { // class for armour
       Jeans : { // name of armour
@@ -93,10 +99,8 @@ const mainState = { // create main scean
         cost : 0// points needed to get it
       }
     }
-this.boughtArmour = [] // creates empty array
-
-
-
+    this.mineCost= 0;
+    this.boughtArmour = []; // creates empty array
 
     //zombie---------------------------------------------
 
@@ -115,6 +119,10 @@ this.boughtArmour = [] // creates empty array
     this.bullets.enableBody = true;  // add physics to group
     this.bullets.physicsBodyType = Phaser.Physics.ARCADE;  // add physics to group
 
+    this.mines = game.add.group(); // puts bullet sprite in group
+    this.mines.enableBody = true;  // add physics to group
+    this.mines.physicsBodyType = Phaser.Physics.ARCADE;
+
     for (let i = 0; i < 40; i++) { // create up tp 40 bullets
       let b = this.bullets.create(0, 0, 'bullet');
       b.exists = false; // sprite doesnt exist
@@ -129,6 +137,8 @@ this.boughtArmour = [] // creates empty array
 
     this.score = 0;
     this.scoreDisplay = game.add.text(1100, 20, `Money £${this.score}`, { font: '30px Arial', fill: '#584f99' });
+    this.waveDisplay = game.add.text(1100, 65, `Wave ${this.currentWave}/5`, { font: '30px Arial', fill: '#584f99' });
+    this.mineDisplay = game.add.text(10, 60, `Mines: ${this.mineCount}`, { font: '15px Arial', fill: '#ffffff' });
 // score stuff i bearly understand-------------------------------------------
 
     this.cursors = game.input.keyboard.createCursorKeys(); // setting spacebar as a button
@@ -145,15 +155,16 @@ this.boughtArmour = [] // creates empty array
 // the shop---------------------------------------------------------------
     this.shopSprite = game.add.sprite(0, 0, "shop"); // add the shop
     this.shopSmg = game.add.sprite(450, 20, "shopSmg"); // add specific gun icon
-    this.shopShotgun = game.add.sprite(595, 20, "shopShotgun"); // add specific gun icon
-    this.shopSniper = game.add.sprite(740, 20, "shopSniper"); // add specific gun icon
+    this.shopShotgun = game.add.sprite(575, 20, "shopShotgun"); // add specific gun icon
+    this.shopSniper = game.add.sprite(700, 20, "shopSniper"); // add specific gun icon
+    this.Mine = game.add.sprite(960, 40, "Mine");
 
     //this.clothes = game.add.sprite( 845, 20, "clothes");
 
-    this.armourT1 = game.add.sprite(875, 20,"armourT1")  // adds sprite of clothing/ armour
-    this.armourT2 = game.add.sprite(925, 20,"armourT2") // adds sprite of clothing/ armour
-    this.armourB1 = game.add.sprite(875, 60,"armourB1") // adds sprite of clothing/ armour
-    this.armourB2 = game.add.sprite(925, 65,"armourB2") // adds sprite of clothing/ armour
+    this.armourT1 = game.add.sprite(850, 20,"armourT1")  // adds sprite of clothing/ armour
+    this.armourT2 = game.add.sprite(900, 20,"armourT2") // adds sprite of clothing/ armour
+    this.armourB1 = game.add.sprite(850, 60,"armourB1") // adds sprite of clothing/ armour
+    this.armourB2 = game.add.sprite(900, 65,"armourB2") // adds sprite of clothing/ armour
 
 
 
@@ -179,6 +190,8 @@ this.boughtArmour = [] // creates empty array
         c.animations.add('crawl', [0,1], 3, true); // add frames of sprite sheet
         c.animations.play("crawl"); // play animation
       }
+      this.currentWave ++;
+      this.waveDisplay.text = `Wave ${this.currentWave}/5`;
 
       for (let i = 0; i < 16; i++) { // create 30 zombies
         let c = this.zombies.create(580 + (i % 4) * 90, 350 + Math.floor(i / 4) * 80, 'zss');  // set there starting postion
@@ -257,6 +270,20 @@ this.boughtArmour = [] // creates empty array
     }
   },
 
+  placeMine: function () {
+    if(this.mineCount <= 0) {
+      return;
+    }
+
+      if (game.time.now > this.bulletTime && this.score >= this.mineCost) {
+          this.bulletTime = game.time.now + this.timeBetweenShots;
+          this.mines.create(this.man.position.x + this.man.width /2 -5 , this.man.position.y + this.man.height , "mine");
+          this.mineCount -- ;
+          this.mineDisplay.text = `Mines :${this.mineCount}`;
+      }
+
+  },
+
   gameOver: function () { // create function called game over
     game.state.start('gameover'); // change state to game over screen
   },
@@ -269,6 +296,7 @@ this.boughtArmour = [] // creates empty array
       // this makes the sniper round go through zombies
     }
 
+
     zss.kill(); // kill the zss
     if (this.zombies.countLiving() === 0) {// when there are no zombies left
       this.score = this.score + 10; // add 100 to score
@@ -277,6 +305,12 @@ this.boughtArmour = [] // creates empty array
     }
 
     this.scoreDisplay.text = `Money £${this.score}`; // displays score and high score
+  },
+
+  hitMine: function(mine, zss) {
+    mine.kill();
+    zss.kill();
+
   },
 
   preload: function () { // load in assets before game starts
@@ -312,6 +346,7 @@ this.boughtArmour = [] // creates empty array
     game.load.image('smg', 'assets/Gunz/SMG.png'); // load smg
     game.load.image('shotgun', 'assets/Gunz/Shotgun.png'); // load shotgun
     game.load.image('sniper', 'assets/Gunz/Sniper.png'); // load sniper
+    game.load.image('mine', 'assets/mine.png');
     //guns-------------------------------------------------------
 
     //shop sprites----------------------------------------------
@@ -319,7 +354,7 @@ this.boughtArmour = [] // creates empty array
     game.load.image('shopShotgun', 'assets/ShopSprites/shotgun.png');  // load shotgun shop image
     game.load.image('shopSniper', 'assets/ShopSprites/sniper.png');  // load sniper shop image
     game.load.image('clothes', 'assets/ShopSprites/health.png'); // load clothe image
-
+    game.load.image('Mine', 'assets/ShopSprites/Mine.png');
 
     game.load.image('armourT1', 'assets/ShopSprites/vest.png'); // adds shop image for vest
     game.load.image('armourB1', 'assets/ShopSprites/jeans.png'); // adds shop image for jeans
@@ -352,10 +387,12 @@ this.boughtArmour = [] // creates empty array
     this.shopSmg.visible = visibility // make smg invisble and visible when it needs to be
     this.shopShotgun.visible = visibility;// make shotgun invisible and visible when it needs to be
     this.shopSniper.visible = visibility;// make sniper invisible and visible when it needs to be
+    this.Mine.visible = visibility;
     this.armourT1.visible = visibility;// make vest invisible and visible when it needs to be
     this.armourT2.visible = visibility;// make jacket invisible and visible when it needs to be
     this.armourB1.visible = visibility;// make jeans invisible and visible when it needs to be
     this.armourB2.visible = visibility;// make shoes invisible and visible when it needs to be
+
     //this.clothes.visible = visibility;
 
     this.shopSmg.inputEnabled = true;// allows imput on smg
@@ -367,6 +404,20 @@ this.boughtArmour = [] // creates empty array
 
     this.shopSniper.inputEnabled = true; // allows imput on sniper
     this.shopSniper.events.onInputDown.add(()=>{ this.changeGun(this.guns.Sniper); }); // on click change to gun
+
+    this.Mine.inputEnabled = true; // allows imput on sniper
+    this.Mine.events.onInputDown.add(()=>{
+      if(this.canBuyMines === false)
+        return;
+        if(this.score < this.mineCost)
+        return;
+      this.mineCount ++;
+      this.mineDisplay.text = `Mines :${this.mineCount}`;
+      this.canBuyMines = false;
+
+      game.time.events.add(Phaser.Timer.SECOND * 0.2, ()=>{ this.canBuyMines = true; }, this);
+
+    }); // on click change to gun
 
     this.armourB1.inputEnabled = true; // allows imput on jeans
     this.armourB1.events.onInputDown.add(()=>{this.changeClothes(this.armour.Jeans );}); // click on to equip
@@ -402,14 +453,17 @@ this.boughtArmour = [] // creates empty array
       console.log("lol2poor")
       return;
     }
-    if(this.currentGun.sprite != null) // if gun is null
+
+    if(this.currentGun.sprite != null){
       this.currentGun.sprite.kill(); // kill currant gun
+    } // if gun is null
+
     this.currentGun = gun; // and becoms new gun
+    this.currentGun.isBought = true;
     gun.sprite = game.add.sprite(this.man.position.x, this.man.position.y, gun.spriteName); // attach gun to man/character
     this.timeBetweenShots = 1/(gun.roundsPerMinute / 60000); // minute into milliseconds (60 seconds and 60,000 milliseconds)
     this.fireSound = game.add.audio(gun.soundName); // change gun soung to selected gun sound
     gun.sound = this.fireSound; // change gun soung to selected gun sound
-
 
   },
 
@@ -418,7 +472,9 @@ this.boughtArmour = [] // creates empty array
     this.isWaveCleared = (this.zombies.countLiving() == 0); //
 
     game.physics.arcade.overlap(this.bullets, this.zombies, this.hit, null, this); // when a bullet touches a zombie, run hit function
+    game.physics.arcade.overlap(this.mines, this.zombies, this.hitMine, null, this);
   //  game.physics.arcade.overlap(this.zombies, this.man, this.manGotHit, null, this);
+
 
     if (game.input.keyboard.justPressed(Phaser.Keyboard.P)) { // if p is pressed
       this.isPaused = !this.isPaused; // invert pause boolean
@@ -477,6 +533,11 @@ this.boughtArmour = [] // creates empty array
       this.fire(); // run fucntion fire (shoot)
     }
 
+    if (this.cursors.down.isDown) {
+      this.placeMine();
+
+    }
+
     this.currentGun.sprite.position = this.man.position; // fix gun postion to man/ character
 
     this.boughtArmour.forEach((armour)=>{armour.sprite.position = this.man.position ; }); // move clothes on to character
@@ -492,6 +553,35 @@ this.boughtArmour = [] // creates empty array
     //this.adjustShopVisibility(this.isWaveCleared);
 
     this.shop(); // runs shop function
+
+    if(game.input.keyboard.justPressed(Phaser.Keyboard.ONE)) {
+      console.log("you did it");
+      if(this.guns.Pistol.isBought === true) {
+        this.changeGun(this.guns.Pistol);
+      }
+    }
+    else if(game.input.keyboard.justPressed(Phaser.Keyboard.TWO)) {
+      console.log("u did it");
+      if(this.guns.Smg.isBought === true) {
+        this.changeGun(this.guns.Smg);
+      }
+    }
+    else if(game.input.keyboard.justPressed(Phaser.Keyboard.THREE)) {
+      console.log("woo did it");
+      if(this.guns.Shotgun.isBought === true) {
+        this.changeGun(this.guns.Shotgun);
+      }
+    }
+    else if(game.input.keyboard.justPressed(Phaser.Keyboard.FOUR)) {
+      console.log("coo did it");
+      if(this.guns.Sniper.isBought === true) {
+        this.changeGun(this.guns.Sniper);
+      }
+    }
+    else if(game.input.keyboard.justPressed(Phaser.Keyboard.FIVE)) {
+      console.log("who did it?");
+    }
+
   },
 
 
