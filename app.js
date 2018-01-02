@@ -13,7 +13,7 @@ const mainState = { // create main scean
     this.isWaveCleared = false; // boolean for wave interval
     this.clothesBought = 0; // Sets ammount of clothes bought
     this.health = 1; // sets starting health
-    this.currentWave = 4;
+    this.currentWave = 0;
     this.canBuyMines = true;
 
     this.guns = { // class for weapons
