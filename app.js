@@ -2,6 +2,10 @@
 const mainState = { // create main scean
 
   create: function () { // static code
+
+    game.scale.pageAlignVertically = true;
+    game.scale.pageAlignHorizontally = true;
+
     game.stage.backgroundColor = '#2d2d2d'; // colour load in before background image loads, mostly used to be sure the program is running
     this.background = game.add.sprite(0, 0, 'background'); // add the background
 
@@ -14,13 +18,12 @@ const mainState = { // create main scean
     this.clothesBought = 0; // Sets ammount of clothes bought
     this.health = 1; // sets starting health
     this.currentWave = 0;
-    this.canBuyMines = true;
+    this.canBuyItem = true;
+    this.maxWave = 6;
 
     this.guns = { // class for weapons
         Pistol : { // weapon name
-        reloadTime : 0.7, // reload time of gun
         roundsPerMinute : 175, // rounds per min of gun
-        magazineSize : 12, // ammount of bullets untill reload of gun
         cost : 20, // points needed to get it
         sprite : null, // sprite doesnt load in at start
         spriteName : "pistol", // sprite it will use
@@ -29,10 +32,8 @@ const mainState = { // create main scean
         isBought : false
       },
       Smg : { // weapon name of gun
-        reloadTime : 1.6, // reload time of gun
-        roundsPerMinute : 600, // rounds per min of gun
-        magazineSize : 25, // ammount of bullets untill reload of gun
-        cost : 20, // points needed to get it
+        roundsPerMinute : 580, // rounds per min of gun
+        cost : 50, // points needed to get it
         sprite : null,// doesnt load in at start
         spriteName : "smg", // sprite it will use
         sound : null, // sound doesnt load in at start
@@ -40,10 +41,8 @@ const mainState = { // create main scean
         isBought : false
       },
       Shotgun : { // weapon name of gun
-        reloadTime : 2, // reload time of gun
         roundsPerMinute : 50, // rounds per min of gun
-        magazineSize : 8, // ammount of bullets untill reload of gun
-        cost : 20, // points needed to get it
+        cost : 45, // points needed to get it
         sprite : null,// doesnt load in at start
         spriteName : "shotgun", // sprite it will use
         sound : null, // sound doesnt load in at start
@@ -51,10 +50,8 @@ const mainState = { // create main scean
         isBought : false
       },
       Sniper : { // weapon name of gun
-        reloadTime : 1, // reload time of gun
         roundsPerMinute : 60, // rounds per min of gun
-        magazineSize : 15, // ammount of bullets untill reload of gun
-        cost : 20, // points needed to get it
+        cost : 40, // points needed to get it
         sprite : null,// doesnt load in at start
         spriteName : "sniper", // sprite it will use
         sound : null, // sound doesnt load in at start
@@ -89,14 +86,14 @@ const mainState = { // create main scean
         sprite : null,// doesnt load at the start
         spriteName : "bottom2",// sprite it will use
         healthBouns: 1,// amount of health it will give you
-        cost : 20,// points needed to get it
+        cost : 30,// points needed to get it
       },
 
       Jacket : {// name of armour
         sprite : null,// doesnt load at the start
         spriteName : "top2",// sprite it will use
         healthBouns: 1,// amount of health it will give you
-        cost : 20// points needed to get it
+        cost : 30// points needed to get it
       }
     }
     this.mineCost= 20;
@@ -137,7 +134,7 @@ const mainState = { // create main scean
 
     this.score = 0;
     this.scoreDisplay = game.add.text(1100, 20, `Money £${this.score}`, { font: '30px Arial', fill: '#584f99' });
-    this.waveDisplay = game.add.text(1100, 65, `Wave ${this.currentWave}/5`, { font: '30px Arial', fill: '#584f99' });
+    this.waveDisplay = game.add.text(1100, 65, `Wave ${this.currentWave}/${this.maxWave}`, { font: '30px Arial', fill: '#584f99' });
     this.mineDisplay = game.add.text(10, 60, `Mines: ${this.mineCount}`, { font: '15px Arial', fill: '#ffffff' });
 
 
@@ -193,7 +190,7 @@ const mainState = { // create main scean
         c.animations.play("crawl"); // play animation
       }
       this.currentWave ++;
-      this.waveDisplay.text = `Wave ${this.currentWave}/5`;
+      this.waveDisplay.text = `Wave ${this.currentWave}/${this.maxWave}`;
 
       for (let i = 0; i < 16; i++) { // create 30 zombies
         let c = this.zombies.create(580 + (i % 4) * 90, 350 + Math.floor(i / 4) * 80, 'zss');  // set there starting postion
@@ -228,39 +225,17 @@ const mainState = { // create main scean
   fire: function () { // the shooting function
     if (game.time.now > this.bulletTime) { //
       this.fireSound.play(); // play the gun sound
-      let bullet = this.bullets.getFirstExists(false);
-      if (bullet && this.currentGun == this.guns.Shotgun) { // if true and applys only to the shotgun
-        bullet.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
-        bullet.body.velocity.y = 1500;  bullet.body.velocity.x = 500; // makes bullets move at speed
-      }
-      let bullet2 = this.bullets.getFirstExists(false);
-      if (bullet2 && this.currentGun == this.guns.Shotgun) {
-        bullet2.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
-        bullet2.body.velocity.y = 1500;  bullet2.body.velocity.x = -500; // makes bullets move at speed
-        this.bulletTime = game.time.now + this.timeBetweenShots; // adds time between each shot
-      }
-      let bullet3 = this.bullets.getFirstExists(false);
-      if (bullet3 && this.currentGun == this.guns.Shotgun) {
-        bullet3.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
-        bullet3.body.velocity.y = 1500; // makes bullets move at speed
-        this.bulletTime = game.time.now + this.timeBetweenShots; // adds time between each shot
-      }
-      let bullet4 = this.bullets.getFirstExists(false);
-      if (bullet4 && this.currentGun == this.guns.Shotgun) {
-        bullet4.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
-        bullet4.body.velocity.y = 1500; bullet4.body.velocity.x = 1250; // makes bullets move at speed
-       this.bulletTime = game.time.now + this.timeBetweenShots; // adds time between each shot
-      }
-      let bullet5 = this.bullets.getFirstExists(false);
-      if (bullet5 && this.currentGun == this.guns.Shotgun) {
-        bullet5.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
-        bullet5.body.velocity.y = 1500; bullet5.body.velocity.x = -1250; // makes bullets move at speed
-        this.bulletTime = game.time.now + this.timeBetweenShots; // adds time between each shot
+
+      if(this.currentGun === this.guns.Shotgun){
+        this.fireBullet(500, 1500);
+        this.fireBullet(-500, 1500);
+        this.fireBullet(0, 1500);
+        this.fireBullet(1250, 1500);
+        this.fireBullet(-1250, 1500);
       }
       else { // applys to all other guns
-        bullet.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
-        bullet.body.velocity.y = 1500; // makes bullets move at speed
-        this.bulletTime = game.time.now + this.timeBetweenShots; // adds time between each shot
+        this.fireBullet(0, 1500);
+        
       }
 
       if(this.currentGun == this.guns.Shotgun){ // if gun is shotgun
@@ -269,6 +244,16 @@ const mainState = { // create main scean
       else if(this.currentGun == this.guns.Sniper){ // if gun is shotgun
         game.camera.shake(0.005, 200);// shake the screen
       }
+    }
+  },
+
+  fireBullet: function (xVelocity, yVelocity){
+    let bullet = this.bullets.getFirstExists(false);
+    if (bullet) {
+      bullet.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
+      bullet.body.velocity.x = xVelocity;
+      bullet.body.velocity.y = yVelocity;  // makes bullets move at speed
+      this.bulletTime = game.time.now + this.timeBetweenShots; // adds time between each shot
     }
   },
 
@@ -289,8 +274,9 @@ const mainState = { // create main scean
   gameOver: function () { // create function called game over
     game.state.start('gameover'); // change state to game over screen
   },
+
   winner: function() {
-  game.state.start('won')
+    game.state.start('won')
   },
 
   hit: function (bullet, zss) { // create hit function that applys to bullet and zss
@@ -300,7 +286,6 @@ const mainState = { // create main scean
       bullet.kill(); // destroy bullet on impact with zombie
       // this makes the sniper round go through zombies
     }
-
 
     zss.kill(); // kill the zss
     if (this.zombies.countLiving() === 0) {// when there are no zombies left
@@ -315,7 +300,6 @@ const mainState = { // create main scean
   hitMine: function(mine, zss) {
     mine.kill();
     zss.kill();
-
   },
 
   preload: function () { // load in assets before game starts
@@ -380,7 +364,6 @@ const mainState = { // create main scean
     if (distance < 62 && this.isWaveCleared === true) { // and if its witihin range and the wave is clear
       console.log("your shoppin, good jobbin"); // console print (For debugging)
       this.adjustShopVisibility(true); // makes shop visible
-
     }
     else { // and if not
       this.adjustShopVisibility(false); // shop is invisible
@@ -401,40 +384,137 @@ const mainState = { // create main scean
     //this.clothes.visible = visibility;
 
     this.shopSmg.inputEnabled = true;// allows imput on smg
-    this.shopSmg.events.onInputDown.add(()=>{ this.changeGun(this.guns.Smg); // on click change to gun
+    this.shopSmg.events.onInputDown.add(()=>{
+      if(this.canBuyItem === false)
+        return;
 
+      if (this.score < this.guns.Smg.cost) { // your score(money) must be higher than the cost of the weapon to by
+          console.log("cant afford")
+          return;
+      }
+
+      this.changeGun(this.guns.Smg); // on click change to gun
+      this.score -= this.guns.Smg.cost
+      this.scoreDisplay.text = `Money £${this.score}`;
+      this.canBuyItem = false;
+      game.time.events.add(Phaser.Timer.SECOND * 0.2, ()=>{ this.canBuyItem = true; }, this);
     }); // function to change gun
-    this.shopShotgun.inputEnabled = true; // allows imput on shotgun
-    this.shopShotgun.events.onInputDown.add(()=>{ this.changeGun(this.guns.Shotgun); }); // on click change to gun
+
+      this.shopShotgun.inputEnabled = true; // allows imput on shotgun
+      this.shopShotgun.events.onInputDown.add(()=>{
+      if(this.canBuyItem === false)
+      return;
+
+      if (this.score < this.guns.Shotgun.cost) { // your score(money) must be higher than the cost of the weapon to by
+        console.log("cant afford")
+        return;
+      }
+
+      this.changeGun(this.guns.Shotgun); // on click change to gun
+      this.score -= this.guns.Shotgun.cost
+      this.scoreDisplay.text = `Money £${this.score}`;
+      this.canBuyItem = false;
+      game.time.events.add(Phaser.Timer.SECOND * 0.2, ()=>{ this.canBuyItem = true; }, this);
+    }); // function to change gun
 
     this.shopSniper.inputEnabled = true; // allows imput on sniper
-    this.shopSniper.events.onInputDown.add(()=>{ this.changeGun(this.guns.Sniper); }); // on click change to gun
+    this.shopSniper.events.onInputDown.add(()=>{
+      if(this.canBuyItem === false)
+      return;
+
+      if (this.score < this.guns.Sniper.cost) { // your score(money) must be higher than the cost of the weapon to by
+        console.log("cant afford")
+        return;
+      }
+
+      this.changeGun(this.guns.Sniper); // on click change to gun
+      this.score -= this.guns.Sniper.cost
+      this.scoreDisplay.text = `Money £${this.score}`;
+      this.canBuyItem = false;
+      game.time.events.add(Phaser.Timer.SECOND * 0.2, ()=>{ this.canBuyItem = true; }, this);
+    }); // function to change gun
 
     this.Mine.inputEnabled = true; // allows imput on sniper
     this.Mine.events.onInputDown.add(()=>{
-      if(this.canBuyMines === false)
+      if(this.canBuyItem === false)
         return;
-        if(this.score < this.mineCost)
+
+      if(this.score < this.mineCost)
         return;
+
+        this.score -= this.mineCost;
+        this.scoreDisplay.text = `Money £${this.score}`;
       this.mineCount ++;
       this.mineDisplay.text = `Mines :${this.mineCount}`;
-      this.canBuyMines = false;
-
-      game.time.events.add(Phaser.Timer.SECOND * 0.2, ()=>{ this.canBuyMines = true; }, this);
-
+      this.canBuyItem = false;
+      game.time.events.add(Phaser.Timer.SECOND * 0.2, ()=>{ this.canBuyItem = true; }, this);
     }); // on click change to gun
 
     this.armourB1.inputEnabled = true; // allows imput on jeans
-    this.armourB1.events.onInputDown.add(()=>{this.changeClothes(this.armour.Jeans );}); // click on to equip
+    this.armourB1.events.onInputDown.add(()=>{
+      if(this.canBuyItem === false)
+        return;
+
+      if (this.score < this.armour.Jeans.cost) { // your score(money) must be higher than the cost of the weapon to by
+        console.log("cant afford")
+        return;
+      }
+
+      this.changeClothes(this.armour.Jeans ); // on click change to gun
+      this.score -= this.armour.Jeans.cost
+      this.scoreDisplay.text = `Money £${this.score}`;
+      this.canBuyItem = false;
+      game.time.events.add(Phaser.Timer.SECOND * 0.2, ()=>{ this.canBuyItem = true; }, this);
+    });
 
     this.armourB2.inputEnabled = true; // allows imput on shoes
-    this.armourB2.events.onInputDown.add(()=>{this.changeClothes(this.armour.Shoes);});// click on to equip
+    this.armourB2.events.onInputDown.add(()=>{
+      if(this.canBuyItem === false)
+        return;
+
+      if (this.score < this.armour.Shoes.cost) { // your score(money) must be higher than the cost of the weapon to by
+        console.log("cant afford")
+        return;
+      }
+
+      this.changeClothes(this.armour.Shoes ); // on click change to gun
+      this.score -= this.armour.Shoes.cost
+      this.scoreDisplay.text = `Money £${this.score}`;
+      this.canBuyItem = false;
+      game.time.events.add(Phaser.Timer.SECOND * 0.2, ()=>{ this.canBuyItem = true; }, this);
+    });// click on to equip
 
     this.armourT1.inputEnabled = true; // allows imput on vest
-    this.armourT1.events.onInputDown.add(()=>{this.changeClothes(this.armour.Shirt);});// click on to equip
+    this.armourT1.events.onInputDown.add(()=>{
+      if(this.canBuyItem === false)
+      return;
+
+      if (this.score < this.armour.Shirt.cost) { // your score(money) must be higher than the cost of the weapon to by
+        console.log("cant afford")
+        return;
+      }
+
+      this.changeClothes(this.armour.Shirt ); // on click change to gun
+      this.score -= this.armour.Shirt.cost
+      this.scoreDisplay.text = `Money £${this.score}`;
+      this.canBuyItem = false;
+      game.time.events.add(Phaser.Timer.SECOND * 0.2, ()=>{ this.canBuyItem = true; }, this);
+    });// click on to equip
 
     this.armourT2.inputEnabled = true; // allows imput on jacket
-    this.armourT2.events.onInputDown.add(()=>{this.changeClothes(this.armour.Jacket);});// click on to equip
+    this.armourT2.events.onInputDown.add(()=>{if(this.canBuyItem === false)
+      return;
+      if (this.score < this.armour.Jacket.cost) { // your score(money) must be higher than the cost of the weapon to by
+        console.log("cant afford")
+        return;
+      }
+
+      this.changeClothes(this.armour.Jacket ); // on click change to gun
+      this.score -= this.armour.Jacket.cost
+      this.scoreDisplay.text = `Money £${this.score}`;
+      this.canBuyItem = false;
+      game.time.events.add(Phaser.Timer.SECOND * 0.2, ()=>{ this.canBuyItem = true; }, this);
+    });// click on to equip
 
     //this.clothes.inputEnabled = true;
     //this.clothes.events.onInputDown.add(()=>{this.changeClothes(this.armour.Jeans);});
@@ -448,16 +528,12 @@ const mainState = { // create main scean
         //if(armour === this.armourT1) {
         //  }
 
-      this.boughtArmour.push(armour); // add this armour to the array
+    this.boughtArmour.push(armour); // add this armour to the array
     this.updateHealth(); // calls update health function
 
   },
 
   changeGun: function (gun) { // function to change gun
-    if (this.score < gun.cost) { // your score(money) must be higher than the cost of the weapon to by
-      console.log("lol2poor")
-      return;
-    }
 
     if(this.currentGun.sprite != null){
       this.currentGun.sprite.kill(); // kill currant gun
@@ -508,7 +584,7 @@ const mainState = { // create main scean
       (zombie) => { // lambda for zombie
         zombie.body.position.y = zombie.body.position.y - this.zombieMoveSpeed; // adds incremental speed
         if (zombie.y + zombie.height < 200) { // if they reach the top of the building
-        zombie.destroy(); // destroy the zombie
+        zombie.kill(); // destroy the zombie
           this.health --; // take away health
           console.log(this.health); // paste health in console
           this.updateHealth(); // call update health
@@ -520,7 +596,7 @@ const mainState = { // create main scean
       this.gameOver(); // call gameOver
     }
 
-    if (this.currentWave === 6) { // if your health is 0 or lower
+    if (this.currentWave > this.maxWave) { // if your health is 0 or lower
       this.winner(); // call gameOver
     }
 
@@ -537,8 +613,12 @@ const mainState = { // create main scean
       }
     }
 // Distance in pixels the player can walk from the edge of the screen
-
-    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) { //when spacebar is down
+    if(this.currentGun === this.guns.Pistol) {
+      if (game.input.keyboard.justPressed(Phaser.Keyboard.SPACEBAR)) { //when spacebar is down
+        this.fire(); // run fucntion fire (shoot)
+      }
+    }
+    else if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) { //when spacebar is down
       this.fire(); // run fucntion fire (shoot)
     }
 
@@ -548,6 +628,8 @@ const mainState = { // create main scean
     }
 
     this.currentGun.sprite.position = this.man.position; // fix gun postion to man/ character
+
+
 
     this.boughtArmour.forEach((armour)=>{armour.sprite.position = this.man.position ; }); // move clothes on to character
 
