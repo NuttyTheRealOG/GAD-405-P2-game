@@ -682,11 +682,34 @@ const gameoverState = { // game over state
     },
     create: function () {  // static code
     game.add.image(0, 0, "win") // add image
+    game.input.onDown.add(() => { game.state.start('main'); });//  on mouse click, load mainstate (restart game)
   }
   };
 
+  const ControlState = { // game over state
+    preload: function () { // load in assets before game starts
+      game.load.image('controls', 'assets/tutorial screen.png'); // load image
+    },
+    startGame: function  () { // new function
+      game.state.start('main'); // load main game
+    },
+
+    create: function () {  // static code
+      game.scale.pageAlignVertically = true; // center phaser game canvas vertically
+      game.scale.pageAlignHorizontally = true; // center phaser game canvas horizontally
+    game.add.image(0, 0, "controls") // add image
+    game.input.onDown.add(() => { this.startGame(); }); // on click load function (start the game)
+    game.time.events.add(Phaser.Timer.SECOND *10, ()=>{this.startGame()}, this); // wait 10 seconds, then then start the game
+
+  },
+
+
+  };
+
+
   const game = new Phaser.Game(1280, 720); // Phaser game in 720p
+  game.state.add('controls', ControlState) // add controlsstate
   game.state.add('main', mainState); // add mainState
   game.state.add('gameover', gameoverState);  // add gameover
   game.state.add('won', wonState ); // and won
-  game.state.start('main'); // start main
+  game.state.start('controls'); // start at the tutorial
