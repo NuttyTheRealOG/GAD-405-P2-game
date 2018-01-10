@@ -20,11 +20,7 @@ const mainState = { // create main scean
     this.currentWave = 0; // sets the starting wave
     this.canBuyItem = true; // boolean to stop you buying 1 item per frame of clicking
     this.maxWave = 5; // sets the maximen wave for game over
-<<<<<<< HEAD
     this.randFire = 1.2; // value for SMG's random fire
-=======
-    this.randFire = 1.2;
->>>>>>> 33d54d42820fa2c9553ba6736eaa018c2286b0ba
 
     this.guns = { // class for weapons
         Pistol : { // weapon name
