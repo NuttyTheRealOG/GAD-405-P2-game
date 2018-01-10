@@ -133,7 +133,7 @@ const mainState = { // create main scean
 
 
 
-    this.score = 1; // starting "score" / money is 1
+    this.score = 0; // starting "score" / money is 0
     this.scoreDisplay = game.add.text(1100, 20, `Money £${this.score}`, { font: '30px Arial', fill: '#584f99' }); // display money
     this.waveDisplay = game.add.text(1100, 65, `Wave ${this.currentWave}/${this.maxWave}`, { font: '30px Arial', fill: '#584f99' }); // display wave
     this.mineDisplay = game.add.text(10, 60, `Mines: ${this.mineCount}`, { font: '15px Arial', fill: '#ffffff' }); // display amount of mines
@@ -157,11 +157,8 @@ const mainState = { // create main scean
     this.shopSniper = game.add.sprite(700, 20, "shopSniper"); // add specific gun icon
     this.Mine = game.add.sprite(960, 40, "Mine"); // add specific mine icon
 
-<<<<<<< HEAD
+
     this.shopSale = game.add.sprite(0, 0,"shopSale"); // add sprite for prices
-=======
-    this.shopSale = game.add.sprite(0, 0,"shopSale"); // add sprite for price
->>>>>>> b69e0cb7c6807c77b7ab499d1e78b6f0a96b0f5f
 
     this.armourT1 = game.add.sprite(850, 20,"armourT1");  // adds sprite of clothing/ armour
     this.armourT2 = game.add.sprite(900, 20,"armourT2"); // adds sprite of clothing/ armour
@@ -274,10 +271,6 @@ const mainState = { // create main scean
 
         game.physics.arcade.velocityFromRotation(bulletRot, 1000, bullet2.body.velocity);
         bullet2.rotation = bulletRot - 1.3; // gives bullet rotation
-<<<<<<< HEAD
-=======
-        game.physics.arcade.velocityFromRotation(bulletRot, 1000, bullet2.body.velocity);
->>>>>>> b69e0cb7c6807c77b7ab499d1e78b6f0a96b0f5f
         this.bulletTime = game.time.now + this.timeBetweenShots; // adds time between each shot
       }
     },
@@ -288,7 +281,7 @@ const mainState = { // create main scean
     }
 
       if (game.time.now > this.bulletTime && this.score >= this.mineCost) { // if you can afford mines
-         this.bulletTime = game.time.now + this.timeBetweenShots; 
+         this.bulletTime = game.time.now + this.timeBetweenShots;
           this.mines.create(this.man.position.x + this.man.width /2 -5 , this.man.position.y + this.man.height , "mine"); // place mine under character
           this.mineCount -- ; // take away 1 mine
           this.mineDisplay.text = `Mines :${this.mineCount}`; // update text for mines
@@ -313,7 +306,7 @@ const mainState = { // create main scean
     }
 
     zss.kill(); // kill the zss
-    console.log(this.zombies.countLiving())
+
     if (this.zombies.countLiving() === 0) {// when there are no zombies left
       this.score = this.score + 10; // add 100 to score
       this.waveSpawn(); // run wave spawn function
@@ -375,13 +368,7 @@ const mainState = { // create main scean
     game.load.image('armourB2', 'assets/ShopSprites/shoes.png'); // load shop image for shoes
 
     game.load.image('shopSale', 'assets/ShopPrice.png'); // load price image
-<<<<<<< HEAD
-=======
-    game.load.image('armourT1', 'assets/ShopSprites/vest.png'); // adds shop image for vest
-    game.load.image('armourB1', 'assets/ShopSprites/jeans.png'); // adds shop image for jeans
-    game.load.image('armourT2', 'assets/ShopSprites/jacket.png'); // adds shop image for jacket
-    game.load.image('armourB2', 'assets/ShopSprites/shoes.png'); // adds shop image for shoes
->>>>>>> b69e0cb7c6807c77b7ab499d1e78b6f0a96b0f5f
+
     //shop sprites----------------------------------------------
   },
 
@@ -389,7 +376,7 @@ const mainState = { // create main scean
     let distance = Math.abs(this.man.x - this.sm.x); // measure x distance between man and shop keeper
 
     if (distance < 62 && this.isWaveCleared === true) { // and if its witihin range and the wave is clear
-      console.log("your shoppin, good jobbin"); // console print (For debugging)
+
       this.adjustShopVisibility(true); // makes shop visible
     }
     else { // and if not
@@ -408,12 +395,7 @@ const mainState = { // create main scean
     this.armourB1.visible = visibility;// make jeans invisible and visible when it needs to be
     this.armourB2.visible = visibility;// make shoes invisible and visible when it needs to be
     this.shopSale.visible = visibility;;// make prices invisible and visible when it needs to be
-<<<<<<< HEAD
-    //this.clothes.visible = visibility;
 
-=======
-    
->>>>>>> b69e0cb7c6807c77b7ab499d1e78b6f0a96b0f5f
     this.shopSmg.inputEnabled = true;// allows imput on smg
     this.shopSmg.events.onInputDown.add(()=>{ // when clicked on
       if(this.canBuyItem === false) // if can buy iteam is false
