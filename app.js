@@ -20,7 +20,11 @@ const mainState = { // create main scean
     this.currentWave = 0; // sets the starting wave
     this.canBuyItem = true; // boolean to stop you buying 1 item per frame of clicking
     this.maxWave = 5; // sets the maximen wave for game over
+<<<<<<< HEAD
     this.randFire = 1.2; // value for SMG's random fire
+=======
+    this.randFire = 1.2;
+>>>>>>> 33d54d42820fa2c9553ba6736eaa018c2286b0ba
 
     this.guns = { // class for weapons
         Pistol : { // weapon name
@@ -157,7 +161,20 @@ const mainState = { // create main scean
     this.shopSniper = game.add.sprite(700, 20, "shopSniper"); // add specific gun icon
     this.Mine = game.add.sprite(960, 40, "Mine"); // add specific mine icon
 
+<<<<<<< HEAD
     this.shopSale = game.add.sprite(0, 0,"shopSale"); // add sprite for prices
+=======
+    //this.clothes = game.add.sprite( 845, 20, "clothes");
+
+
+    this.shopSale = game.add.sprite(0, 0,"shopSale");
+
+    this.armourT1 = game.add.sprite(850, 20,"armourT1");  // adds sprite of clothing/ armour
+    this.armourT2 = game.add.sprite(900, 20,"armourT2"); // adds sprite of clothing/ armour
+    this.armourB1 = game.add.sprite(850, 60,"armourB1"); // adds sprite of clothing/ armour
+    this.armourB2 = game.add.sprite(900, 65,"armourB2"); // adds sprite of clothing/ armour
+
+>>>>>>> 33d54d42820fa2c9553ba6736eaa018c2286b0ba
 
     this.armourT1 = game.add.sprite(850, 20,"armourT1");  // adds sprite of clothing/ armour
     this.armourT2 = game.add.sprite(900, 20,"armourT2"); // adds sprite of clothing/ armour
@@ -231,8 +248,13 @@ const mainState = { // create main scean
         this.fireBullet(-1250, 1500);// fire bullet far to the left
       }
 
+<<<<<<< HEAD
       else if(this.currentGun === this.guns.Smg) { // if the gun is smg
         this.fireBullet2(0, 1500); // use a different bullet
+=======
+      else if(this.currentGun === this.guns.Smg) {
+        this.fireBullet2(0, 1500);
+>>>>>>> 33d54d42820fa2c9553ba6736eaa018c2286b0ba
       }
 
       else { // applys to all other guns
@@ -255,6 +277,9 @@ const mainState = { // create main scean
       bullet.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
       bullet.body.velocity.x = xVelocity; // bullet body horizontal velocity = xVelocity
       bullet.body.velocity.y = yVelocity;   // bullet body vertical velocity = yVelocity
+      //bulletRot = Math.random() / 4
+      //game.physics.arcade.velocityFromRotation(bulletRot, 1000, bullet.body.velocity);
+      //bullet.rotation = bulletRot + 90;
       this.bulletTime = game.time.now + this.timeBetweenShots; // adds time between each shot
     }
   },
@@ -266,10 +291,17 @@ const mainState = { // create main scean
         bullet2.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
         bullet2.body.velocity.x = xVelocity; // bullet body horizontal velocity = xVelocity
         bullet2.body.velocity.y = yVelocity;   // bullet body vertical velocity = yVelocity
+<<<<<<< HEAD
         bulletRot = (Math.random()/2) + this.randFire; // gives variation in velocity
 
         game.physics.arcade.velocityFromRotation(bulletRot, 1000, bullet2.body.velocity);
         bullet2.rotation = bulletRot - 1.3; // gives bullet rotation
+=======
+        bulletRot = (Math.random()/2) + this.randFire;
+
+        game.physics.arcade.velocityFromRotation(bulletRot, 1000, bullet2.body.velocity);
+        bullet2.rotation = bulletRot - 1.3;
+>>>>>>> 33d54d42820fa2c9553ba6736eaa018c2286b0ba
         this.bulletTime = game.time.now + this.timeBetweenShots; // adds time between each shot
       }
     },
@@ -361,12 +393,21 @@ const mainState = { // create main scean
     game.load.image('clothes', 'assets/ShopSprites/health.png'); // load shop heart image image
     game.load.image('Mine', 'assets/ShopSprites/Mine.png'); // load mine shop image
 
+<<<<<<< HEAD
     game.load.image('armourT1', 'assets/ShopSprites/vest.png'); // load shop image for vest
     game.load.image('armourB1', 'assets/ShopSprites/jeans.png'); // load shop image for jeans
     game.load.image('armourT2', 'assets/ShopSprites/jacket.png'); // load shop image for jacket
     game.load.image('armourB2', 'assets/ShopSprites/shoes.png'); // load shop image for shoes
 
     game.load.image('shopSale', 'assets/ShopPrice.png'); // load price image
+=======
+    game.load.image('armourT1', 'assets/ShopSprites/vest.png'); // adds shop image for vest
+    game.load.image('armourB1', 'assets/ShopSprites/jeans.png'); // adds shop image for jeans
+    game.load.image('armourT2', 'assets/ShopSprites/jacket.png'); // adds shop image for jacket
+    game.load.image('armourB2', 'assets/ShopSprites/shoes.png'); // adds shop image for shoes
+
+    game.load.image('shopSale', 'assets/ShopPrice.png');
+>>>>>>> 33d54d42820fa2c9553ba6736eaa018c2286b0ba
     //shop sprites----------------------------------------------
   },
 
@@ -392,7 +433,11 @@ const mainState = { // create main scean
     this.armourT2.visible = visibility;// make jacket invisible and visible when it needs to be
     this.armourB1.visible = visibility;// make jeans invisible and visible when it needs to be
     this.armourB2.visible = visibility;// make shoes invisible and visible when it needs to be
+<<<<<<< HEAD
     this.shopSale.visible = visibility;;// make prices invisible and visible when it needs to be
+=======
+    this.shopSale.visible = visibility;
+>>>>>>> 33d54d42820fa2c9553ba6736eaa018c2286b0ba
     //this.clothes.visible = visibility;
 
     this.shopSmg.inputEnabled = true;// allows imput on smg
@@ -636,6 +681,7 @@ const mainState = { // create main scean
     }
     else if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) { //when spacebar is down
       this.fire(); // run fucntion fire (shoot)
+
     }
 
     if (this.cursors.down.isDown) { // if donw arrow is place
