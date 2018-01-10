@@ -7,7 +7,7 @@ const mainState = { // create main scean
     game.scale.pageAlignHorizontally = true; // center phaser game canvas horizontally
 
     game.stage.backgroundColor = '#2d2d2d'; // colour load in before background image loads, mostly used to be sure the program is running
-    this.background = game.add.sprite(0, 0, 'background'); // add the background
+      this.background = game.add.sprite(0, 0, 'background'); // add the background
 
     this.man = game.add.sprite(400, 105, 'man'); // add the main character
     //this.pistol = game.add.sprite(this.man.position.x, this.man.position.y, 'pistol');
@@ -19,7 +19,8 @@ const mainState = { // create main scean
     this.health = 1; // sets starting health
     this.currentWave = 0; // sets the starting wave
     this.canBuyItem = true; // boolean to stop you buying 1 item per frame of clicking
-    this.maxWave = 6; // sets the maximen wave for game over
+    this.maxWave = 5; // sets the maximen wave for game over
+    this.randFire = 1.2; // value for SMG's random fire
 
     this.guns = { // class for weapons
         Pistol : { // weapon name
@@ -32,7 +33,7 @@ const mainState = { // create main scean
         isBought : false // sets starting state to not bought
       },
       Smg : { // weapon name of gun
-        roundsPerMinute : 580, // rounds per min of gun
+        roundsPerMinute : 560, // rounds per min of gun
         cost : 50, // points needed to get it
         sprite : null,// doesnt load in at start
         spriteName : "smg", // sprite it will use
@@ -50,7 +51,7 @@ const mainState = { // create main scean
         isBought : false// sets starting state to not bought
       },
       Sniper : { // weapon name of gun
-        roundsPerMinute : 60, // rounds per min of gun
+        roundsPerMinute : 65, // rounds per min of gun
         cost : 40, // points needed to get it
         sprite : null,// doesnt load in at start
         spriteName : "sniper", // sprite it will use
@@ -108,7 +109,7 @@ const mainState = { // create main scean
     this.waveSpawn(); // calls wavespawn event
 
     this.zombieMoveSpeed = 0.1; //  sets the speed the enemys move towards player
-    this.zombieMoveSpeedIncrease = 0.075; // sets how much faster they get each round
+    this.zombieMoveSpeedIncrease = 0.055; // sets how much faster they get each round
 
     //zombie---------------------------------------------
 
@@ -118,10 +119,10 @@ const mainState = { // create main scean
 
     this.mines = game.add.group(); // puts bullet sprite in group
     this.mines.enableBody = true;  // add physics to group
-    this.mines.physicsBodyType = Phaser.Physics.ARCADE;
+    this.mines.physicsBodyType = Phaser.Physics.ARCADE; // add physics to group
 
     for (let i = 0; i < 40; i++) { // create up tp 40 bullets
-      let b = this.bullets.create(0, 0, 'bullet');
+      let b = this.bullets.create(0, 0, 'bullet');//
       b.exists = false; // sprite doesnt exist
       b.visible = false;  // sprite is invisible
       b.checkWorldBounds = true; // will see if bullet is out of canvas
@@ -132,7 +133,7 @@ const mainState = { // create main scean
 
 
 
-    this.score = 0; // starting "score" / moeny is 0
+    this.score = 100; // starting "score" / moeny is 0
     this.scoreDisplay = game.add.text(1100, 20, `Money £${this.score}`, { font: '30px Arial', fill: '#584f99' }); // display money
     this.waveDisplay = game.add.text(1100, 65, `Wave ${this.currentWave}/${this.maxWave}`, { font: '30px Arial', fill: '#584f99' }); // display wave
     this.mineDisplay = game.add.text(10, 60, `Mines: ${this.mineCount}`, { font: '15px Arial', fill: '#ffffff' }); // display amount of mines
@@ -156,22 +157,18 @@ const mainState = { // create main scean
     this.shopSniper = game.add.sprite(700, 20, "shopSniper"); // add specific gun icon
     this.Mine = game.add.sprite(960, 40, "Mine"); // add specific mine icon
 
-    //this.clothes = game.add.sprite( 845, 20, "clothes");
+    this.shopSale = game.add.sprite(0, 0,"shopSale"); // add sprite for prices
 
-    this.armourT1 = game.add.sprite(850, 20,"armourT1")  // adds sprite of clothing/ armour
-    this.armourT2 = game.add.sprite(900, 20,"armourT2") // adds sprite of clothing/ armour
-    this.armourB1 = game.add.sprite(850, 60,"armourB1") // adds sprite of clothing/ armour
-    this.armourB2 = game.add.sprite(900, 65,"armourB2") // adds sprite of clothing/ armour
-
-
+    this.armourT1 = game.add.sprite(850, 20,"armourT1");  // adds sprite of clothing/ armour
+    this.armourT2 = game.add.sprite(900, 20,"armourT2"); // adds sprite of clothing/ armour
+    this.armourB1 = game.add.sprite(850, 60,"armourB1"); // adds sprite of clothing/ armour
+    this.armourB2 = game.add.sprite(900, 65,"armourB2"); // adds sprite of clothing/ armour
 
     this.adjustShopVisibility(false); // make above sprites invisible
 
 // the shop---------------------------------------------------------------
 
   this.fullHealth = game.add.group() // puts healt into a group
-
-
 
   this.updateHealth(); // calls updateHealth function
 
@@ -217,13 +214,13 @@ const mainState = { // create main scean
       hp.destroy();// destroys hp
     });
 
-    for (let i = 0; i < this.health; i++) {
-      let j = this.fullHealth.create(i * 70, 0, 'heart');// adds health
+    for (let i = 0; i < this.health; i++) { // Displays hearts on the screen
+      let j = this.fullHealth.create(i * 70, 0, 'heart');// adds heart sprite
     }
   },
 
   fire: function () { // the shooting function
-    if (game.time.now > this.bulletTime) {
+    if (game.time.now > this.bulletTime) { //creates bullet interval
       this.fireSound.play(); // play the gun sound
 
       if(this.currentGun === this.guns.Shotgun){ // if the gun is shotgun
@@ -233,6 +230,11 @@ const mainState = { // create main scean
         this.fireBullet(1250, 1500); // fire bullet far to the right
         this.fireBullet(-1250, 1500);// fire bullet far to the left
       }
+
+      else if(this.currentGun === this.guns.Smg) { // if the gun is smg
+        this.fireBullet2(0, 1500); // use a different bullet
+      }
+
       else { // applys to all other guns
         this.fireBullet(0, 1500); // fire bullet stright down
 
@@ -257,13 +259,28 @@ const mainState = { // create main scean
     }
   },
 
+
+    fireBullet2: function (xVelocity, yVelocity){ // create fuction that effects velocity
+      let bullet2 = this.bullets.getFirstExists(false); // get first exists
+      if (bullet2) { // if bullet
+        bullet2.reset(this.currentGun.sprite.x + (this.currentGun.sprite.width - 45), this.currentGun.sprite.y - (this.currentGun.sprite.height -130)); // set bullet spawn postion starting from the guns postion
+        bullet2.body.velocity.x = xVelocity; // bullet body horizontal velocity = xVelocity
+        bullet2.body.velocity.y = yVelocity;   // bullet body vertical velocity = yVelocity
+        bulletRot = (Math.random()/2) + this.randFire; // gives variation in velocity
+
+        game.physics.arcade.velocityFromRotation(bulletRot, 1000, bullet2.body.velocity);
+        bullet2.rotation = bulletRot - 1.3; // gives bullet rotation
+        this.bulletTime = game.time.now + this.timeBetweenShots; // adds time between each shot
+      }
+    },
+
   placeMine: function () { // function for placing mines
     if(this.mineCount <= 0) { // if there are 0 or less mines
       return; // do nothing
     }
 
       if (game.time.now > this.bulletTime && this.score >= this.mineCost) { // if you can afford mines
-         this.bulletTime = game.time.now + this.timeBetweenShots;
+         this.bulletTime = game.time.now + this.timeBetweenShots; 
           this.mines.create(this.man.position.x + this.man.width /2 -5 , this.man.position.y + this.man.height , "mine"); // place mine under character
           this.mineCount -- ; // take away 1 mine
           this.mineDisplay.text = `Mines :${this.mineCount}`; // update text for mines
@@ -288,10 +305,10 @@ const mainState = { // create main scean
     }
 
     zss.kill(); // kill the zss
+    console.log(this.zombies.countLiving())
     if (this.zombies.countLiving() === 0) {// when there are no zombies left
       this.score = this.score + 10; // add 100 to score
       this.waveSpawn(); // run wave spawn function
-
     }
 
     this.scoreDisplay.text = `Money £${this.score}`; // displays score and high score
@@ -307,7 +324,6 @@ const mainState = { // create main scean
 
     //misc-----------------------------------------------------
     game.load.image('bullet', 'assets/bullet.png'); // load bullet
-    //game.load.spritesheet('explode', 'assets/explode.png', 128, 128); // load
     game.load.image('background', 'assets/background.png'); // load background
     game.load.image('man', 'assets/Naked Man.png'); // // load character
     game.load.image('sm', 'assets/salesman.png'); // load shopkeeper
@@ -345,10 +361,12 @@ const mainState = { // create main scean
     game.load.image('clothes', 'assets/ShopSprites/health.png'); // load shop heart image image
     game.load.image('Mine', 'assets/ShopSprites/Mine.png'); // load mine shop image
 
-    game.load.image('armourT1', 'assets/ShopSprites/vest.png'); // adds shop image for vest
-    game.load.image('armourB1', 'assets/ShopSprites/jeans.png'); // adds shop image for jeans
-    game.load.image('armourT2', 'assets/ShopSprites/jacket.png'); // adds shop image for jacket
-    game.load.image('armourB2', 'assets/ShopSprites/shoes.png'); // adds shop image for shoes
+    game.load.image('armourT1', 'assets/ShopSprites/vest.png'); // load shop image for vest
+    game.load.image('armourB1', 'assets/ShopSprites/jeans.png'); // load shop image for jeans
+    game.load.image('armourT2', 'assets/ShopSprites/jacket.png'); // load shop image for jacket
+    game.load.image('armourB2', 'assets/ShopSprites/shoes.png'); // load shop image for shoes
+
+    game.load.image('shopSale', 'assets/ShopPrice.png'); // load price image
     //shop sprites----------------------------------------------
   },
 
@@ -374,7 +392,7 @@ const mainState = { // create main scean
     this.armourT2.visible = visibility;// make jacket invisible and visible when it needs to be
     this.armourB1.visible = visibility;// make jeans invisible and visible when it needs to be
     this.armourB2.visible = visibility;// make shoes invisible and visible when it needs to be
-
+    this.shopSale.visible = visibility;;// make prices invisible and visible when it needs to be
     //this.clothes.visible = visibility;
 
     this.shopSmg.inputEnabled = true;// allows imput on smg
@@ -533,14 +551,12 @@ const mainState = { // create main scean
     } // if gun is null
 
     this.currentGun = gun; // and becoms new gun
-    this.currentGun.isBought = true;
+    this.currentGun.isBought = true; // gun becomes bought
     gun.sprite = game.add.sprite(this.man.position.x, this.man.position.y, gun.spriteName); // attach gun to man/character
     this.timeBetweenShots = 1/(gun.roundsPerMinute / 60000); // minute into milliseconds (60 seconds and 60,000 milliseconds)
     this.fireSound = game.add.audio(gun.soundName); // change gun soung to selected gun sound
     gun.sound = this.fireSound; // change gun soung to selected gun sound
-
   },
-
 
   update: function () { // function that updates each frame
     this.isWaveCleared = (this.zombies.countLiving() == 0); // there must be 0 zombines for wave to be clear
@@ -572,14 +588,22 @@ const mainState = { // create main scean
     }
 
     this.man.body.velocity.x = 0; // man isnt moving
+
     this.zombies.forEach( // every zombie
       (zombie) => { // lambda for zombie
+
         zombie.body.position.y = zombie.body.position.y - this.zombieMoveSpeed; // adds incremental speed
         if (zombie.y + zombie.height < 200) { // if they reach the top of the building
-        zombie.destroy(); // destroy the zombie
+          zombie.destroy(); // destroy the zombie
           this.health --; // take away health
           console.log(this.health); // paste health in console
           this.updateHealth(); // call update health
+          game.camera.flash(0xbff0000 , 200) // makes camera flash red when character takes damage
+
+          if (this.zombies.countLiving() === 0) {// when there are no zombies left
+            this.score = this.score + 10; // add 100 to score
+            this.waveSpawn(); // run wave spawn function
+          }
         }
       }
     );
@@ -616,15 +640,11 @@ const mainState = { // create main scean
 
     if (this.cursors.down.isDown) { // if donw arrow is place
       this.placeMine(); // run placeMine
-
     }
 
     this.currentGun.sprite.position = this.man.position; // fix gun postion to man/ character
 
-
-
     this.boughtArmour.forEach((armour)=>{armour.sprite.position = this.man.position ; }); // move clothes on to character
-
 
     if (this.isWaveCleared ===  false) { // if there are zombies remaining
        game.add.tween(this.sm.body).to( {y:175}, 500, Phaser.Easing.Linear.None, true ); // shop keep goes down
@@ -700,13 +720,9 @@ const gameoverState = { // game over state
     game.add.image(0, 0, "controls") // add image
     game.input.onDown.add(() => { this.startGame(); }); // on click load function (start the game)
     game.time.events.add(Phaser.Timer.SECOND *10, ()=>{this.startGame()}, this); // wait 10 seconds, then then start the game
-
   },
 
-
   };
-
-
   const game = new Phaser.Game(1280, 720); // Phaser game in 720p
   game.state.add('controls', ControlState) // add controlsstate
   game.state.add('main', mainState); // add mainState
